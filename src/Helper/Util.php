@@ -2,8 +2,49 @@
 
 namespace FR\BackgroundSms\Helper;
 
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport\SendmailTransport;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+
 class Util
 {
+    /**
+     * Convert mixed email input (string or key/value array) to Symfony addresses.
+     *
+     * @param string|array $emails
+     * @return Address[]
+     */
+    private static function emailsToAddresses($emails)
+    {
+        $addresses = [];
+
+        if (is_string($emails) && trim($emails) != '') {
+            $addresses[] = new Address(trim($emails));
+
+            return $addresses;
+        }
+
+        if (!is_array($emails) || empty($emails)) {
+            return $addresses;
+        }
+
+        foreach ($emails as $email => $name) {
+            if (is_int($email)) {
+                if (is_string($name) && trim($name) != '') {
+                    $addresses[] = new Address(trim($name));
+                }
+            } else {
+                if (trim($email) != '') {
+                    $addresses[] = new Address(trim($email), trim((string)$name));
+                }
+            }
+        }
+
+        return $addresses;
+    }
+
     /**
      * Filter given mobile number
      *
@@ -165,53 +206,66 @@ class Util
         @$bcc       = self::emailsToArray($bcc);
 
         try {
-            if (empty($smtp))
-                $SwiftTransport = new \Swift_SendmailTransport();
-
-            if (!empty($smtp)) {
-                $SwiftTransport = new \Swift_SmtpTransport();
-
-                if (@$smtp['host']) $SwiftTransport->setHost($smtp['host']);
-                if (@$smtp['port']) $SwiftTransport->setPort($smtp['port']);
-                if (@$smtp['encryption']) $SwiftTransport->setEncryption($smtp['encryption']);
-                if (@$smtp['username']) $SwiftTransport->setUsername($smtp['username']);
-                if (@$smtp['password']) $SwiftTransport->setPassword($smtp['password']);
+            if (empty($smtp)) {
+                $transport = new SendmailTransport();
             }
 
-            $SwiftMailer  = new \Swift_Mailer($SwiftTransport);
-            $SwiftMessage = new \Swift_Message();
+            if (!empty($smtp)) {
+                $host = !empty($smtp['host']) ? trim($smtp['host']) : 'localhost';
+                $port = !empty($smtp['port']) ? intval($smtp['port']) : 0;
 
-            if (!empty($from))
-                $SwiftMessage->setFrom($from);
+                $encryption = !empty($smtp['encryption']) ? strtolower(trim($smtp['encryption'])) : '';
+                $tls = null;
+                if ($encryption == 'ssl' || $encryption == 'tls') {
+                    $tls = true;
+                }
+
+                $transport = new EsmtpTransport($host, $port, $tls);
+
+                if (!empty($smtp['username'])) $transport->setUsername($smtp['username']);
+                if (!empty($smtp['password'])) $transport->setPassword($smtp['password']);
+            }
+
+            $mailer  = new Mailer($transport);
+            $message = new Email();
+
+            $from_addresses = self::emailsToAddresses($from);
+            $to_addresses = self::emailsToAddresses($to);
+            $reply_to_addresses = self::emailsToAddresses($reply_to);
+            $cc_addresses = self::emailsToAddresses($cc);
+            $bcc_addresses = self::emailsToAddresses($bcc);
+
+            if (!empty($from_addresses))
+                $message->from(...$from_addresses);
             else
                 throw new \Exception('From email could not be empty');
 
             if (!empty($subject))
-                $SwiftMessage->setSubject($subject);
+                $message->subject($subject);
             else
                 throw new \Exception('Subject could not be empty');
 
             if (!empty($body)) {
-                $SwiftMessage->setBody($body, 'text/html');
-                $SwiftMessage->addPart(strip_tags($body), 'text/plain');
+                $message->html($body);
+                $message->text(strip_tags($body));
             } else
                 throw new \Exception('Body could not be empty');
 
-            if (!empty($to))
-                $SwiftMessage->setTo($to);
+            if (!empty($to_addresses))
+                $message->to(...$to_addresses);
             else
                 throw new \Exception('To email could not be empty');
 
-            if (!empty($reply_to))
-                $SwiftMessage->setReplyTo($reply_to);
+            if (!empty($reply_to_addresses))
+                $message->replyTo(...$reply_to_addresses);
 
-            if (!empty($cc))
-                $SwiftMessage->setCc($cc);
+            if (!empty($cc_addresses))
+                $message->cc(...$cc_addresses);
 
-            if (!empty($bcc))
-                $SwiftMessage->setBcc($bcc);
+            if (!empty($bcc_addresses))
+                $message->bcc(...$bcc_addresses);
 
-            $SwiftMailer->send($SwiftMessage);
+            $mailer->send($message);
 
             return true;
         } catch (\Exception $e) {
