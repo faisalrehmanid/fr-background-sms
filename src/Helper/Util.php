@@ -107,10 +107,10 @@ class Util
     }
 
     /**
-     * Validate single email address and convert email string to array 
+     * Validate single email address and convert email string to array
      * when email used with name. Email and name separated by :
-     * 
-     * @param string $email e.g. some1@address.com: Name 
+     *
+     * @param string $email e.g. some1@address.com: Name
      * @return string | array e.g. [some1@address.com => Name]
      */
     public static function emailToArray($email)
@@ -132,9 +132,9 @@ class Util
     /**
      * Convert multiple emails string to array
      * Multiple emails separated by ; and each email and name separated by :
-     * 
+     *
      * @param string $emails e.g. some1@address.com; some2@address.com: Name; some3@address.com
-     * @return array e.g [  some1@address.com, 
+     * @return array e.g [  some1@address.com,
      * 					   [some2@address.com => Name],
      * 						some3@address.com
      * 					 ]
@@ -174,7 +174,7 @@ class Util
     }
 
     /**
-     * Send email 
+     * Send email
      *
      * @param string $from Single email address like from@test.com:From Name
      * @param string $smtp_json SMTP Json string
@@ -216,7 +216,7 @@ class Util
 
                 $encryption = !empty($smtp['encryption']) ? strtolower(trim($smtp['encryption'])) : '';
                 $tls = null;
-                if ($encryption == 'ssl' || $encryption == 'tls') {
+                if ($encryption == 'ssl') {
                     $tls = true;
                 }
 
@@ -345,7 +345,7 @@ class Util
                         if ($space == 3)
                             @$statuses[$k]['running'] .= $chr;  // Number of jobs running
                         if ($space == 4)
-                            @$statuses[$k]['workers'] .= $chr;  // Number of capable workers 
+                            @$statuses[$k]['workers'] .= $chr;  // Number of capable workers
                     } else {
                         $space++;
                     }
@@ -360,7 +360,7 @@ class Util
 
     /**
      * Drop all idle gearman functions that doing nothing
-     * Which means functions having 0 queue, 0 running, 0 workers 
+     * Which means functions having 0 queue, 0 running, 0 workers
      *
      * It is a safe function and only drop that function having 0 0 0
      * when run `gearadmin --stauts` on command line
@@ -398,7 +398,7 @@ class Util
      *
      * @param string $gearadmin cmd command complete path e.g: /bin/gearadmin
      * @param string $pkill cmd command complete path e.g: /bin/pkill
-     * @param string $sms_background_worker_id 
+     * @param string $sms_background_worker_id
      * @return void
      */
     public static function shutdownSmsBackgroundWorker($gearadmin, $pkill, $sms_background_worker_id)
