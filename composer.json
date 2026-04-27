@@ -18,14 +18,6 @@
       "FR\\BackgroundSms\\": "src/"
     }
   },
-  "autoload-dev": {
-    "files": [
-      "tests/Bootstrap.php"
-    ],
-    "psr-4": {
-      "FRUnitTest\\BackgroundSms\\": "tests/src/unit"
-    }
-  },
   "require": {
     "php": ">=5.4.0",
     "faisalrehmanid/fr-db": ">=1.0"
