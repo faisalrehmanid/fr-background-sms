@@ -10,7 +10,7 @@ class SendSmsWorker
 	/**
 	 * Configurations
 	 *
-	 * @var array $config 
+	 * @var array $config
 	 * @see \FR\BackgroundSms\BackgroundSms::__construct $config
 	 */
 	protected $config;
@@ -44,7 +44,7 @@ class SendSmsWorker
 	public function listen($worker_id = 'SendSmsWorker')
 	{
 		// Gearman servers from config
-		// Comma separated servers e.g. 127.0.0.1:4730,127.0.0.1:4731 
+		// Comma separated servers e.g. 127.0.0.1:4730,127.0.0.1:4731
 		$servers = $this->config['gearman']['worker']['servers'];
 
 		$worker = new \GearmanWorker();
@@ -73,7 +73,7 @@ class SendSmsWorker
 	 */
 	public function sendSms(
 		$job,
-		&$context
+		$context
 	) {
 		$Storage = $context['Storage'];
 

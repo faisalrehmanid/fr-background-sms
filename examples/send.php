@@ -19,7 +19,7 @@ try {
     $recipients = [];
     $keys = [];
     if (($handle = fopen("./to.csv", "r")) !== FALSE) {
-        while (($row = fgetcsv($handle)) !== FALSE) {
+        while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== FALSE) {
             if ($index == 0) { // Read header row
                 $keys = $row;
             } elseif ($index > 0) // Skip first header row
@@ -51,7 +51,7 @@ try {
     // Sending email to $recipients
     $BackgroundSms = new BackgroundSms($config);
 
-    // $notify_to is optional and can be empty string but when given 
+    // $notify_to is optional and can be empty string but when given
     // it will send notification email about job status to given email addresses
 
     // Notification email will be sent when:

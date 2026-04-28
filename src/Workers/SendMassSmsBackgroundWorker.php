@@ -10,7 +10,7 @@ class SendMassSmsBackgroundWorker
 	/**
 	 * Configurations
 	 *
-	 * @var array $config 
+	 * @var array $config
 	 * @see \FR\BackgroundSms\BackgroundSms::__construct $config
 	 */
 	protected $config;
@@ -47,7 +47,7 @@ class SendMassSmsBackgroundWorker
 		Util::dropIdleGearmanFunctions($this->config['cmd']['gearadmin']);
 
 		// Gearman servers from config
-		// Comma separated servers e.g. 127.0.0.1:4730,127.0.0.1:4731 
+		// Comma separated servers e.g. 127.0.0.1:4730,127.0.0.1:4731
 		$servers = $this->config['gearman']['worker']['servers'];
 
 		$worker = new \GearmanWorker();
@@ -73,17 +73,17 @@ class SendMassSmsBackgroundWorker
 	 *
 	 * @param object | json $job [
 	 *      'job_id'       => $job_id,		  // 64 Char unique job id
-	 *      'notify_to'    => $notify_to,     // Send notification about job status to this email, can be multiple and separated by ; 
+	 *      'notify_to'    => $notify_to,     // Send notification about job status to this email, can be multiple and separated by ;
 	 *      'recipients'   => $recipients,    // List of all recipients
 	 * 		'retry_number' => 0			      // Initialy it will be 0
 	 * ]
 	 * @param array $context [
-	 * 		'config' => $config, 
+	 * 		'config' => $config,
 	 * 		'Storage' => $Storage
 	 * ]
 	 * @return void
 	 */
-	public function sendMassSmsBackground($job, &$context)
+	public function sendMassSmsBackground($job, $context)
 	{
 		$config = $context['config'];
 		$Storage = $context['Storage'];
@@ -136,7 +136,7 @@ class SendMassSmsBackgroundWorker
 			// Add server to client
 			$client->addServers($config['gearman']['client']['servers']);
 
-			// Insert job details when retry_number is 0 
+			// Insert job details when retry_number is 0
 			if ($retry_number == 0) {
 				$job_status = 'Started';
 				$job_total_count = count($recipients);
@@ -294,11 +294,11 @@ class SendMassSmsBackgroundWorker
 					return true;
 				}
 
-				// Now job has been completed. Retry to send 'Not Sent' emails 
+				// Now job has been completed. Retry to send 'Not Sent' emails
 				// for this job_id and retry_number and consider only retry_exception_codes if given
 				$data = $Storage->getNotSentDataForJobIdAndRetryNumber($job_id, $retry_number, $config['retry_exception_codes']);
 				$recipients = $data['data'];
-				if (!empty($recipients)) // Recipients found 
+				if (!empty($recipients)) // Recipients found
 				{
 					$retry_number++;
 
